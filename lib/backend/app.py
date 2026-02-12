@@ -29,26 +29,38 @@ with app.app_context():
         print("Test user added")
 
 # ===== Authentication =====
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['POST', 'OPTIONS'])
 def register():
-    data = request.json
-    if not data.get('email') or not data.get('password'):
-        return jsonify({'error': 'Email and password required'}), 400
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        data = request.json
+        print(f"Register request data: {data}")
+        
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        
+        if not data.get('email') or not data.get('password'):
+            return jsonify({'error': 'Email and password required'}), 400
 
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({'error': 'Email already exists'}), 400
+        if User.query.filter_by(email=data['email']).first():
+            return jsonify({'error': 'Email already exists'}), 400
 
-    user = User(
-        email=data['email'],
-        name=data.get('name', 'Student Name'),
-        college=data.get('college', 'ABC College'),
-        dept=data.get('dept', 'Computer Science'),
-        year=data.get('year', '3rd Year'),
-    )
-    user.set_password(data['password'])
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({'message': 'User created successfully'}), 201
+        user = User(
+            email=data['email'],
+            name=data.get('name', 'Student Name'),
+            college=data.get('college', 'ABC College'),
+            dept=data.get('dept', 'Computer Science'),
+            year=data.get('year', '3rd Year'),
+        )
+        user.set_password(data['password'])
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({'message': 'User created successfully'}), 201
+    except Exception as e:
+        print(f"Error in register: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
