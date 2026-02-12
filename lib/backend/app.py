@@ -31,6 +31,10 @@ with app.app_context():
 # ===== Authentication =====
 @app.route('/register', methods=['POST', 'OPTIONS'])
 def register():
+    print(f"Request method: {request.method}")
+    print(f"Request headers: {dict(request.headers)}")
+    print(f"Request body: {request.data}")
+    
     if request.method == 'OPTIONS':
         return '', 200
     
@@ -39,27 +43,38 @@ def register():
         print(f"Register request data: {data}")
         
         if not data:
+            print("ERROR: No JSON data")
             return jsonify({'error': 'No JSON data provided'}), 400
         
-        if not data.get('email') or not data.get('password'):
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+        
+        if not email or not password:
+            print(f"ERROR: Missing email={email} or password={password}")
             return jsonify({'error': 'Email and password required'}), 400
 
-        if User.query.filter_by(email=data['email']).first():
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            print(f"ERROR: Email {email} already exists")
             return jsonify({'error': 'Email already exists'}), 400
 
         user = User(
-            email=data['email'],
+            email=email,
             name=data.get('name', 'Student Name'),
             college=data.get('college', 'ABC College'),
             dept=data.get('dept', 'Computer Science'),
             year=data.get('year', '3rd Year'),
         )
-        user.set_password(data['password'])
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
+        print(f"SUCCESS: User {email} created")
         return jsonify({'message': 'User created successfully'}), 201
     except Exception as e:
-        print(f"Error in register: {e}")
+        print(f"ERROR in register: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/login', methods=['POST'])
