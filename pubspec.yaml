@@ -1,0 +1,31 @@
+name: study_connect
+description: "A Study Notes Sharing Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Cupertino icons for iOS-style widgets
+  cupertino_icons: ^1.0.8
+
+  # For making HTTP requests to your Flask backend
+  http: ^1.2.3
+
+  # For picking/uploading files
+  file_picker: ^10.3.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Flutter lint rules
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
